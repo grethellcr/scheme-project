@@ -2,6 +2,40 @@
                  time error))
 
 ;;
+;; make-ring
+;;
+;; (define r (make-ring 3))(display-ring r)
+;;
+
+(define (link value next)
+(+ value 1)
+)
+
+;(define (make-ring number)
+;  (cond ((> number 0)(cons number (make-ring (- number 1)))) 
+;       (else (list 0))
+;  )
+;)
+
+(define (make-ring number)
+  (cond ((> number 0)(
+                      (
+                       link number (make-ring (- number 1)))
+                      )
+                     ) 
+        (else (link 0 0))
+  )
+)
+
+(define (display-ring ring)
+   (cond ((equal? ring '())(display '...))
+         (else (display " ")(display (car ring))(display-ring (cdr ring)))) 
+'ok
+  )
+
+
+
+;;
 ;;toegevoegd
 ;;
 (define true #t)
@@ -48,6 +82,8 @@
              (procedure-parameters procedure)
              arguments
              (procedure-environment procedure))))
+        ((is-make-ring? exp)
+         (display exp))
         (else
          (error
           "Unknown procedure type -- APPLY" procedure))))
@@ -264,6 +300,12 @@
 (define (procedure-environment p) (cadddr p))
 
 ;;
+;; make-ring
+;;
+(define (make-ring? exp)
+  (tagged-list? exp 'make-ring))
+
+;;
 ;; zie deel 1a p. 29
 ;;
 (define (enclosing-environment env) (cdr env))
@@ -374,6 +416,8 @@
         (list '* *)
         (list '= =)
         (list '- -)
+        (list 'make-ring make-ring)
+        (list 'display-ring display-ring)
         ;; more primitives
         ))
 
