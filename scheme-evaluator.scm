@@ -146,8 +146,6 @@
              (procedure-parameters procedure)
              arguments
              (procedure-environment procedure))))
-        ((is-make-ring? exp)
-         (display exp))
         (else
          (error
           "Unknown procedure type -- APPLY" procedure))))
@@ -362,12 +360,6 @@
 (define (procedure-body p) (caddr p))
 
 (define (procedure-environment p) (cadddr p))
-
-;;
-;; make-ring
-;;
-(define (make-ring? exp)
-  (tagged-list? exp 'make-ring))
 
 ;;
 ;; zie deel 1a p. 29
