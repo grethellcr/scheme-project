@@ -1,6 +1,104 @@
 (#%require (only racket/base
                  time error))
 
+;; Start Test Modern Programming Paradigms
+
+
+;;
+;; Metodo auxiliares para la estructura circula, las ideas fueron tomadas de https://github.com/TaylanUB/scheme-srfis/
+;;
+
+;Metodo ausiliar para obtener el ultimo para, su usa en la lista circula
+(define (last-pair lis)
+  (let lp ((lis lis))
+    (let ((tail (cdr lis)))
+      (if (pair? tail) (lp tail) lis))))
+
+;Metodo ausiliar para crear una lista de numeros consecutivos, ej: 3 (3 2 1 0)
+(define (iota count)
+  (let loop ((n count) (r '()))
+    (if (= n -1)
+        (reverse r)
+        (loop (- n 1)
+              (cons n r)))))
+
+;; Para printear la lista, tomado de http://srfi.schemers.org/srfi-1/mail-archive/msg00096.html
+(define (circular-list-length lst)
+  "Return the number of distinct elements of circular list LST."
+  (let ((tortoise lst)
+        (hare lst)
+        (tortoise-advance #t)
+        (len 0))
+    ;; Find a member of the list guaranteed to be within the cycle, and
+    ;; compute length if list turns out to be non-circular.
+    (do ()
+        ((null? hare))
+      (set! hare (cdr hare))
+      (set! len  (+ len 1))
+      (set! tortoise-advance (not tortoise-advance))
+      (if tortoise-advance
+           (set! tortoise (cdr tortoise)))
+      (if (eq? hare tortoise)
+          (begin
+            (set! hare '())
+            (set! len 0))))
+
+    (if (and (not (null? lst))
+             (zero? len))
+        (begin
+          ;; Find period of cycle.
+          (set! hare (cdr tortoise))
+          (set! len 1)
+          (do ()
+              ((eq? hare tortoise))
+            (set! hare (cdr hare))
+            (set! len (+ len 1)))
+
+          ;; Give hare a head start from the start of the list equal to the
+          ;; loop size.  If both move at the same speed they must meet at
+          ;; the nexus because they are in phase, i.e. when tortoise enters
+          ;; the loop, hare must still be exactly one loop period
+          ;; ahead--but that means it will be pointing at the same list
+          ;; element.
+          (set! tortoise lst)
+          (set! hare (list-tail lst len))
+          (do ()
+              ((eq? tortoise hare))
+            (set! hare (cdr hare))
+            (set! tortoise (cdr tortoise))
+            (set! len (+ len 1)))))
+    len))
+
+;;
+;; make-ring
+;;
+;; (define r (make-ring 3))(display-ring r)(display-ring (cdr r))
+;;
+
+; Ejer 1.a
+(define (make-ring count)
+  (let ((ans (iota count)))
+    (set-cdr! (last-pair ans) ans)
+    ans)
+)
+
+; Ejer 1.c
+(define (display-ring ring)
+  (let recur ((lis ring) (k (circular-list-length ring)))
+    (if (zero? k) (display '...)
+	(begin
+          (display " ")
+          (display (car lis))
+          (recur (cdr lis) (- k 1))
+         )    
+    )
+  )
+  'ok)
+
+;; End Test Modern Programming Paradigms
+
+
+
 ;;
 ;;toegevoegd
 ;;
@@ -374,6 +472,8 @@
         (list '* *)
         (list '= =)
         (list '- -)
+        (list 'make-ring make-ring)
+        (list 'display-ring display-ring)
         ;; more primitives
         ))
 
