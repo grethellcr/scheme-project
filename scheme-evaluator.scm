@@ -75,14 +75,14 @@
 ;; (define r (make-ring 3))(display-ring r)(display-ring (cdr r))
 ;;
 
-; Ejer 1.a
+; Ejer 2.a
 (define (make-ring count)
   (let ((ans (iota count)))
     (set-cdr! (last-pair ans) ans)
     ans)
 )
 
-; Ejer 1.c
+; Ejer 2.c
 (define (display-ring ring)
   (let recur ((lis ring) (k (circular-list-length ring)))
     (if (zero? k) (display '...)
@@ -95,8 +95,35 @@
   )
   'ok)
 
-;; End Test Modern Programming Paradigms
+; Ejer 3.a
+; (list-of x (* x x) '(1 2 3 3))
 
+;comprobar si es uan expresion de tipo list-of
+(define (list-of? exp) (tagged-list? exp 'list-of))
+
+;Obtener los argumentos
+(define (get-var exp)(car (list-of-args (operands exp))))
+(define (get-transform-exp exp)(car (cdr (list-of-args (operands exp)))))
+(define (get-input-exp exp)(car (cdr (cdr (list-of-args (operands exp))))))
+
+;obtener la lista de agumentos sin evaluar las expreciones
+(define (list-of-args exps)
+  (if (no-operands? exps)
+      '()
+      (cons (first-operand exps)
+            (list-of-args (rest-operands exps)))))
+
+;metodo auxiliar para llamar al list-of
+(define (eval-list-of exp env)
+  (let temp ((var (get-var exp)) (transform-exp (get-transform-exp exp)) (input-exp (get-input-exp exp)))(list-of var transform-exp input-exp env)))
+
+(define (list-of var transform-exp input-exp env)
+  (let recur ((lis (eval input-exp env)))
+      (if (eq? lis '()) '()	       
+           (cons (eval transform-exp (extend-environment (list var) (list (car lis)) env)) (recur (cdr lis))))))
+
+
+;; End Test Modern Programming Paradigms
 
 
 ;;
@@ -127,6 +154,7 @@
         ((begin? exp) 
          (eval-sequence (begin-actions exp) env))
         ((cond? exp) (eval (cond->if exp) env))
+        ((list-of? exp) (eval-list-of exp env));Agregar aqui para que evalue la exprecion list-of de forma personalizada
         ((application? exp)
          (apply (eval (operator exp) env)
                 (list-of-values (operands exp) env)))
@@ -151,7 +179,7 @@
           "Unknown procedure type -- APPLY" procedure))))
 
 ;;
-;; zie deel 1a p. 10
+;; zie deel 1a p. 10operator
 ;;
 (define (list-of-values exps env)
   (if (no-operands? exps)
@@ -252,7 +280,7 @@
       (make-lambda (cdadr exp)
                    (cddr exp))))
 
-;;
+;;(list-of x (* x x) '(1 2 3))
 ;; zie deel 1a p. 21
 ;;
 (define (if? exp) (tagged-list? exp 'if))
@@ -347,7 +375,7 @@
 (define (rest-operands ops) (cdr ops))
 
 ;;
-;; zie deel 1a p. 27
+;; zie deel 1a p. 27number?
 ;;
 (define (make-procedure parameters body env)
   (list 'procedure parameters body env))
